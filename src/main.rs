@@ -80,17 +80,7 @@ fn read_json_chunk(file_path: &str, max_num_of_obj: u64) -> Result<String, Box<d
 
 fn main() {
 
-    match read_file_range("json_reader_dummy.json", 4, 165) {
-        Ok(extracted_text) => {
-            println!("-------------------\n  File read: \n------------------- \n {}", extracted_text);
-        }
-        Err(e) => {
-            println!("Error reading file {}", e)
-        }
-    };
-
-
-    match read_json_chunk("json_reader_dummy.json", 6) {
+    match read_json_chunk("json_reader_dummy.json", 20) {
         Ok(extracted_text) => {
             println!("-------------------\n  Chunk processer: \n------------------- \n {}", extracted_text);
         }
