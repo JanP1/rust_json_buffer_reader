@@ -14,7 +14,8 @@ fn read_file_range(file_path: &str, start: u64, length: usize)
 
         file.read_exact(&mut buffer)?;
 
-        Ok(String::from_utf8_lossy(&buffer).to_string())
+        let result : String = "[\n  ".to_owned() + &String::from_utf8_lossy(&buffer).to_string() + "\n]";
+        Ok(result)
 }
 
 //Consider result with box pointer for errors so when the function returns an error it passes it
@@ -30,59 +31,59 @@ fn read_json_chunk(file_path: &str, max_num_of_obj: u64) -> Result<String, Box<d
     let mut object_count = 0; // Value for keeping track of how many objects we have already read
 
     let mut beggining_index : usize = 0; // Starting index inside the file
-    let mut ending_index : usize = 0; 
 
     let mut current_index = 0;
 
     while reader.read(&mut buffer)? > 0 {
         let c = buffer[0] as char;
-        println!("Read character: {}", c); // To see where we are in the file
+        //println!("Read character: {}", c); // To see where we are in the file
 
         if c == '{' {
             if object_check_value == 0 && beggining_index == 0{
                 beggining_index = current_index;
             }
-            println!("Found the character '{}'", c);
+            //println!("Found the character '{}'", c);
             object_check_value += 1;
         }
         if c == '}' {
-            println!("Found the character '{}'", c);
+            //println!("Found the character '{}'", c);
             object_check_value -= 1;
 
         }
 
         if object_check_value == 0 && c == '}'{
             object_count += 1;
-            println!("Object count -> {}", object_count);
+            //println!("Object count -> {}", object_count);
             if object_count == max_num_of_obj {
-                ending_index = current_index;
+                current_index += 1;
 
                 println!("Broke out of the loop for some reason. Object count -> {}", object_count);
                 break;
             } 
         }
 
-        println!("-check-value-{}-----", object_check_value);
-        println!("-objects-----{}-----", object_count);
+        if c == ']' {
+            break
+
+        }
+
+        //println!("-check-value-{}-----", object_check_value);
+        //println!("-objects-----{}-----", object_count);
         current_index += 1;
     }
 
-    if ending_index != 0 {
-
-        println!("Ending index {}", ending_index);
-        println!("Beggining index {}", beggining_index);
-        return Ok(read_file_range(file_path, beggining_index.try_into()?, ending_index - beggining_index)?)
-    }
+    println!("Ending index {}", current_index);
+    println!("Beggining index {}", beggining_index);
+    return Ok(read_file_range(file_path, beggining_index.try_into()?, current_index - beggining_index)?)
     
 
-    Ok("Ok".to_string())
 }
 
 fn main() {
 
     match read_json_chunk("json_reader_dummy.json", 20) {
         Ok(extracted_text) => {
-            println!("-------------------\n  Chunk processer: \n------------------- \n {}", extracted_text);
+            println!("-------------------\n  Chunk processer: \n------------------- \n{}", extracted_text);
         }
         Err(e) => {
             println!("Error reading file {}", e)
